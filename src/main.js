@@ -12,7 +12,7 @@ let storage = multer.diskStorage({
     filename: function (req, file, cb) {
         let [_, extension] = file.mimetype.split("/")
 
-        cb(null, `${file.originalname.split(".")[0]}${Date.now()}.${extension}`)
+        cb(null, `${file.originalname.split(".")[0]}(${Date.now()}).${extension}`)
     }
 })
 
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 app.post('/upload', upload.single('file'), (req, res) => {
     console.log(req.file)
-    res.send('upload done!')
+    res.sendFile(path.join(__dirname, '/upload_success.html'))
 })
 
 app.listen(3000, () => console.log('Server is running at port 3000'))
