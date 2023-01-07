@@ -6,18 +6,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>file-sharing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 </head>
 
 <body>
-    <h1>file-sharing</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
+    <div class="container my-5">
+        <h1>📂 file-sharing</h1>
         <br>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input class="form-control" type="file" name="file" required>
+            <br>
+            <input class="btn btn-success" type="submit">
+        </form>
         <br>
-        <input type="submit">
-    </form>
-    <br>
-    <a href="/contents">view all contents</a>
+        <a href="/contents">view all contents</a>
+    </div>
 </body>
 
 </html>
