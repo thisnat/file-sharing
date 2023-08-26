@@ -2,6 +2,7 @@ const express = require('express')
 const serveIndex = require('serve-index')
 const path = require('path')
 const multer = require('multer')
+const getIpv4 = require('./utils/ipv4')
 
 const app = express()
 
@@ -30,4 +31,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.sendFile(path.join(__dirname, '/upload_success.html'))
 })
 
-app.listen(3000, () => console.log('Server is running at port 3000'))
+app.listen(3000, () =>
+  console.log(`💐 Server is running at http://${getIpv4()}:3000/`)
+)
