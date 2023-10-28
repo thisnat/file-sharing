@@ -20,7 +20,7 @@ const upload = multer({
 })
 
 app.use('/contents', express.static('contents'))
-app.use('/contents', serveIndex('contents'))
+app.use('/contents', serveIndex('contents', { icons: true }))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'))
