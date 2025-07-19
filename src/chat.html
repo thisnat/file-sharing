@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Minimal WebSocket Chat</title>
+    <title>Chat powered by WebSocket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body {
@@ -21,28 +21,29 @@
 <!-- Body takes full screen height and removes default padding for mobile, adds for larger screens -->
 <body class="bg-gray-100 flex items-center justify-center h-full">
     <!-- Main chat container: fullscreen on mobile, boxed and larger on medium+ screens -->
-    <!-- h-screen ensures it takes full viewport height on mobile and adjusts with keyboard -->
-    <!-- md:p-6 applies desktop padding to the main box -->
-    <div class="w-full h-screen flex flex-col
-                md:bg-white md:p-6 md:rounded-lg md:shadow-xl md:max-w-2xl md:h-[70vh]">
+    <!-- h-full ensures it takes full viewport height, allowing flex-grow to work properly -->
+    <div class="w-full h-full flex flex-col
+                md:bg-white md:p-4 md:rounded-lg md:shadow-xl md:max-w-2xl md:h-[70vh]">
 
         <!-- Header - uses flex-shrink-0 to take only its content height -->
-        <!-- px-4 for mobile horizontal padding, md:px-0 to remove it on desktop (main container p-6 takes over) -->
+        <!-- px-4 for mobile horizontal padding, md:px-0 to remove it on desktop -->
         <div class="bg-white flex-shrink-0 px-4 md:px-0">
-            <h1 class="text-2xl font-bold text-center text-gray-800 py-4 mb-0 md:mb-6">Minimal Chat</h1>
+            <h1 class="text-2xl font-bold text-center text-gray-800 py-4 md:py-0 mb-0 md:mb-6">Chat</h1>
         </div>
 
 
         <!-- Messages area: grows to fill available space -->
         <!-- p-4 for consistent inner padding, rounded-none for mobile, rounded-lg for desktop -->
-        <div id="messages" class="border border-gray-300 rounded-none md:rounded-lg p-4 overflow-y-auto bg-gray-50 flex-grow">
+        <!-- pb-20 (80px) added to push content above the fixed input on mobile -->
+        <div id="messages" class="border border-gray-300 rounded-none md:rounded-lg p-4 overflow-y-auto bg-gray-50 flex-grow pb-20 md:pb-4">
         </div>
 
-        <!-- Input/Send Button Footer - uses flex-shrink-0 to take only its content height -->
+        <!-- Input/Send Button Footer -->
+        <!-- Fixed positioning for mobile, relative for desktop -->
         <!-- px-4 for mobile horizontal padding, pt-4 for mobile top padding -->
         <!-- pb-[env(safe-area-inset-bottom)] for iOS safe area -->
-        <!-- md:px-0 to remove mobile horizontal padding on desktop (main container p-6 takes over) -->
-        <div class="bg-white flex-shrink-0 px-4 pt-4 pb-[env(safe-area-inset-bottom)] md:px-0">
+        <div class="fixed bottom-0 left-0 right-0 z-10 bg-white p-4
+                    md:relative md:px-0 md:pb-0 md:rounded-b-lg">
             <div class="flex space-x-3">
                 <input
                     type="text"
