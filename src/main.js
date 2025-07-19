@@ -65,6 +65,17 @@ wss.on('connection', (ws) => {
   // Send the client its own ID upon connection
   ws.send(JSON.stringify({ type: 'init', clientId: ws.clientId }))
 
+  // Broadcast a "user joined" message to all clients
+  const joinMessage = {
+    type: 'join',
+    clientId: ws.clientId, // The ID of the client that just joined
+  }
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(joinMessage))
+    }
+  })
+
   ws.on('message', (message) => {
     const messageString = message.toString()
     console.log(`Received from ${ws.clientId}: ${messageString}`)

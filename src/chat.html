@@ -67,7 +67,7 @@
 
         socket.onopen = (event) => {
             console.log('Connected to WebSocket server');
-            appendMessage('System', 'Connected to chat!', 'system', 'text-green-600');
+            appendMessage('System', 'Connected to chat!', 'system', 'text-green-600', false);
         };
 
         socket.onmessage = (event) => {
@@ -76,28 +76,35 @@
             if (messageData.type === 'init') {
                 myClientId = messageData.clientId;
                 console.log(`My client ID is: ${myClientId}`);
-                // Update header with client's avatar and full ID
+                // Removed: Cache own avatar (avatarCache.set(myClientId, myAvatarUrl);)
+                const myAvatarUrl = `https://api.dicebear.com/9.x/glass/svg?seed=${myClientId}`;
+
                 clientInfoDiv.innerHTML = `
-                    <img src="https://api.dicebear.com/9.x/glass/svg?seed=${myClientId}" alt="Your Avatar" class="w-8 h-8 rounded-full">
+                    <img src="${myAvatarUrl}" alt="Your Avatar" class="w-8 h-8 rounded-full">
                     <span class="text-gray-600 text-sm font-medium">${myClientId}</span>
                 `;
             } else if (messageData.type === 'chat') {
                 if (messageData.senderId === myClientId) {
-                    appendMessage('You', messageData.text, messageData.senderId, 'text-blue-600');
+                    appendMessage('You', messageData.text, messageData.senderId, 'text-blue-600', false);
                 } else {
-                    appendMessage(messageData.senderId, messageData.text, messageData.senderId);
+                    appendMessage(messageData.senderId, messageData.text, messageData.senderId, 'text-gray-800', false);
+                }
+            } else if (messageData.type === 'join') {
+                const joinerId = messageData.clientId;
+                if (joinerId !== myClientId) {
+                    appendMessage(joinerId, 'joined the chat!', joinerId, 'text-gray-500', true);
                 }
             }
         };
 
         socket.onclose = (event) => {
             console.log('Disconnected from WebSocket server', event);
-            appendMessage('System', 'Disconnected from chat.', 'system', 'text-red-600');
+            appendMessage('System', 'Disconnected from chat.', 'system', 'text-red-600', false);
         };
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-            appendMessage('System', 'WebSocket error occurred.', 'system', 'text-red-600');
+            appendMessage('System', 'WebSocket error occurred.', 'system', 'text-red-600', false);
         };
 
         const sendMessage = () => {
@@ -117,31 +124,12 @@
             }
         });
 
-        function appendMessage(senderName, messageText, senderId, colorClass = 'text-gray-800') {
+        function appendMessage(senderName, messageText, senderId, colorClass = 'text-gray-800', isCentered = false) {
             const messageContainer = document.createElement('div');
             messageContainer.classList.add('mb-2');
 
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('break-words', 'flex-grow', 'min-w-0');
-
             let displayedSenderName = senderName;
             let titleAttribute = '';
-
-            if (senderId !== 'system') {
-                // Changed items-start to items-center for vertical alignment
-                messageContainer.classList.add('flex', 'items-center', 'space-x-2');
-
-                const avatarImg = document.createElement('img');
-                avatarImg.src = `https://api.dicebear.com/9.x/glass/svg?seed=${senderId}`;
-                avatarImg.alt = 'Avatar';
-                avatarImg.classList.add('w-8', 'h-8', 'rounded-full', 'flex-shrink-0');
-                messageContainer.appendChild(avatarImg);
-
-                if (senderName !== 'You') {
-                    displayedSenderName = senderId.substring(0, 8);
-                    titleAttribute = `title="${senderId}"`;
-                }
-            }
 
             // Regex to find URLs (http/https, www, or bare domain followed by path)
             const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\/[^\s]*)/g;
@@ -151,18 +139,72 @@
                 return text.replace(urlRegex, (url) => {
                     let fullUrl = url;
                     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        fullUrl = 'http://' + url; // Prepend http:// if missing
+                        fullUrl = 'http://' + url;
                     }
                     return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${url}</a>`;
                 });
             };
 
-            // Apply URL formatting to the message text
-            const formattedMessageText = formatMessageText(messageText);
+            if (isCentered) {
+                messageContainer.classList.add('flex', 'flex-col', 'items-center', 'justify-center', 'text-center', 'py-2');
 
-            contentDiv.innerHTML = `<span class="font-semibold ${colorClass}" ${titleAttribute}>${displayedSenderName}:</span> ${formattedMessageText}`;
+                const avatarImg = document.createElement('img');
+                // Removed: Check cache before generating new URL
+                const avatarUrl = `https://api.dicebear.com/9.x/glass/svg?seed=${senderId}`;
+                // Removed: avatarCache.set(senderId, avatarUrl);
+                avatarImg.src = avatarUrl;
+                avatarImg.alt = 'Avatar';
+                avatarImg.classList.add('w-10', 'h-10', 'rounded-full', 'mb-1');
+                messageContainer.appendChild(avatarImg);
 
-            messageContainer.appendChild(contentDiv);
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('font-semibold', colorClass);
+                nameSpan.textContent = senderId;
+                messageContainer.appendChild(nameSpan);
+
+                const messageSpan = document.createElement('span');
+                messageSpan.classList.add('text-gray-500', 'text-sm');
+                messageSpan.textContent = messageText;
+                messageContainer.appendChild(messageSpan);
+
+            } else {
+                // This div will hold the avatar (or spacer) and the combined text content
+                // For normal chat messages, the container is a flex row, items-center for vertical centering
+                messageContainer.classList.add('flex', 'items-center', 'space-x-2');
+
+                if (senderId !== 'system') {
+                    const avatarImg = document.createElement('img');
+                    // Removed: Check cache before generating new URL
+                    const avatarUrl = `https://api.dicebear.com/9.x/glass/svg?seed=${senderId}`;
+                    // Removed: avatarCache.set(senderId, avatarUrl);
+                    avatarImg.src = avatarUrl;
+                    avatarImg.alt = 'Avatar';
+                    avatarImg.classList.add('w-8', 'h-8', 'rounded-full', 'flex-shrink-0');
+                    messageContainer.appendChild(avatarImg);
+
+                    if (senderName !== 'You') {
+                        displayedSenderName = senderId.substring(0, 8);
+                        titleAttribute = `title="${senderId}"`;
+                    }
+                }
+                // System messages are now handled without an avatar/spacer in the flex container.
+                // Their container will simply not have the 'flex' class, allowing them to start from the left.
+                else {
+                    messageContainer.classList.remove('flex', 'items-center', 'space-x-2');
+                }
+
+
+                // Create a div to hold the name and message text
+                const textContentDiv = document.createElement('div');
+                textContentDiv.classList.add('flex-grow', 'min-w-0', 'break-words');
+
+                // Combine name and message text into a single innerHTML for inline flow
+                // This ensures "Name: Message" is on one line if short, and wraps correctly if long.
+                textContentDiv.innerHTML = `<span class="font-semibold ${colorClass}" ${titleAttribute}>${displayedSenderName}:</span> ${formatMessageText(messageText)}`;
+
+                messageContainer.appendChild(textContentDiv);
+            }
+
             messagesDiv.appendChild(messageContainer);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
