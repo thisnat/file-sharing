@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Chat powered by WebSocket</title>
+    <title>Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body {
@@ -28,7 +28,13 @@
         <!-- Header - uses flex-shrink-0 to take only its content height -->
         <!-- px-4 for mobile horizontal padding, md:px-0 to remove it on desktop -->
         <div class="bg-white flex-shrink-0 px-4 md:px-0">
-            <h1 class="text-2xl font-bold text-center text-gray-800 py-4 md:py-0 mb-0 md:mb-6">Chat</h1>
+            <h1 class="text-2xl font-bold text-center text-gray-800 pt-4 md:py-0">Chat</h1>
+            <!-- Container for client's avatar and ID -->
+            <div id="clientInfo" class="flex items-center justify-center space-x-2 pb-4 md:pb-4">
+                <!-- Placeholder for avatar and ID, will be populated by JS -->
+                <img src="https://placehold.co/32x32/cccccc/ffffff?text=?" alt="Avatar" class="w-8 h-8 rounded-full">
+                <span class="text-gray-600 text-sm">Connecting...</span>
+            </div>
         </div>
 
 
@@ -65,6 +71,7 @@
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        const clientInfoDiv = document.getElementById('clientInfo'); // Get the client info div
 
         const wsUrl = window.CHAT_WS_URL || 'ws://localhost:3000';
         const socket = new WebSocket(wsUrl);
@@ -82,6 +89,11 @@
             if (messageData.type === 'init') {
                 myClientId = messageData.clientId;
                 console.log(`My client ID is: ${myClientId}`);
+                // Update header with client's avatar and full ID
+                clientInfoDiv.innerHTML = `
+                    <img src="https://api.dicebear.com/9.x/glass/svg?seed=${myClientId}" alt="Your Avatar" class="w-8 h-8 rounded-full">
+                    <span class="text-gray-600 text-sm font-medium">${myClientId}</span>
+                `;
             } else if (messageData.type === 'chat') {
                 if (messageData.senderId === myClientId) {
                     appendMessage('You', messageData.text, messageData.senderId, 'text-blue-600');
@@ -132,7 +144,7 @@
                 messageContainer.classList.add('flex', 'items-center', 'space-x-2');
 
                 const avatarImg = document.createElement('img');
-                avatarImg.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${senderId}`;
+                avatarImg.src = `https://api.dicebear.com/9.x/glass/svg?seed=${senderId}`;
                 avatarImg.alt = 'Avatar';
                 avatarImg.classList.add('w-8', 'h-8', 'rounded-full', 'flex-shrink-0');
                 messageContainer.appendChild(avatarImg);
