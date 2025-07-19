@@ -154,11 +154,11 @@
                 // Removed: avatarCache.set(senderId, avatarUrl);
                 avatarImg.src = avatarUrl;
                 avatarImg.alt = 'Avatar';
-                avatarImg.classList.add('w-10', 'h-10', 'rounded-full', 'mb-1');
+                avatarImg.classList.add('w-5', 'h-5', 'rounded-full', 'mb-1');
                 messageContainer.appendChild(avatarImg);
 
                 const nameSpan = document.createElement('span');
-                nameSpan.classList.add('font-semibold', colorClass);
+                nameSpan.classList.add('font-semibold', colorClass, 'text-sm');
                 nameSpan.textContent = senderId;
                 messageContainer.appendChild(nameSpan);
 
