@@ -135,12 +135,13 @@
             messageContainer.classList.add('mb-2');
 
             const contentDiv = document.createElement('div');
-            contentDiv.classList.add('break-words', 'flex-grow');
+            contentDiv.classList.add('break-words', 'flex-grow', 'min-w-0');
 
             let displayedSenderName = senderName;
             let titleAttribute = '';
 
             if (senderId !== 'system') {
+                // Changed items-start to items-center for vertical alignment
                 messageContainer.classList.add('flex', 'items-center', 'space-x-2');
 
                 const avatarImg = document.createElement('img');
@@ -155,7 +156,24 @@
                 }
             }
 
-            contentDiv.innerHTML = `<span class="font-semibold ${colorClass}" ${titleAttribute}>${displayedSenderName}:</span> ${messageText}`;
+            // Regex to find URLs (http/https, www, or bare domain followed by path)
+            const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\/[^\s]*)/g;
+
+            // Function to wrap URLs in anchor tags
+            const formatMessageText = (text) => {
+                return text.replace(urlRegex, (url) => {
+                    let fullUrl = url;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        fullUrl = 'http://' + url; // Prepend http:// if missing
+                    }
+                    return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${url}</a>`;
+                });
+            };
+
+            // Apply URL formatting to the message text
+            const formattedMessageText = formatMessageText(messageText);
+
+            contentDiv.innerHTML = `<span class="font-semibold ${colorClass}" ${titleAttribute}>${displayedSenderName}:</span> ${formattedMessageText}`;
 
             messageContainer.appendChild(contentDiv);
             messagesDiv.appendChild(messageContainer);
