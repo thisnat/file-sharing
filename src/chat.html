@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal WebSocket Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <!-- WS_URL_INJECTION_POINT -->
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Minimal Chat</h1>
+
+        <div id="messages" class="border border-gray-300 rounded-lg p-4 h-64 overflow-y-auto mb-4 bg-gray-50">
+        </div>
+
+        <div class="flex space-x-3">
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Type your message..."
+                class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+                id="sendButton"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+                Send
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        const wsUrl = window.CHAT_WS_URL || 'ws://localhost:3000';
+        const socket = new WebSocket(wsUrl);
+
+        socket.onopen = (event) => {
+            console.log('Connected to WebSocket server');
+            appendMessage('System', 'Connected to chat!', 'text-green-600');
+        };
+
+        socket.onmessage = (event) => {
+            // All messages, including your own, will now be displayed via this handler
+            // This ensures consistency and prevents double messages.
+            appendMessage('Other', event.data); // You might want to differentiate 'You' vs 'Other' here later
+        };
+
+        socket.onclose = (event) => {
+            console.log('Disconnected from WebSocket server', event);
+            appendMessage('System', 'Disconnected from chat.', 'text-red-600');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            appendMessage('System', 'WebSocket error occurred.', 'text-red-600');
+        };
+
+        const sendMessage = () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.send(message);
+                // Removed the local appendMessage('You', message, ...);
+                // The message will now appear when the server echoes it back
+                messageInput.value = '';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        };
+
+        sendButton.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function appendMessage(sender, message, colorClass = 'text-gray-800') {
+            const messageElement = document.createElement('p');
+            messageElement.classList.add('mb-2', 'break-words');
+            messageElement.innerHTML = `<span class="font-semibold ${colorClass}">${sender}:</span> ${message}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
