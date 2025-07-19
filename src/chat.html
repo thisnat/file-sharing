@@ -15,30 +15,34 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* No need for media query for overflow now, as the main container will handle height */
     </style>
     <!-- WS_URL_INJECTION_POINT -->
 </head>
 <!-- Body takes full screen height and removes default padding for mobile, adds for larger screens -->
-<!-- Changed min-h-screen to h-full to ensure it strictly takes 100% of parent (html) height -->
-<body class="bg-gray-100 flex items-center justify-center h-full p-0 sm:p-4">
+<body class="bg-gray-100 flex items-center justify-center h-full">
     <!-- Main chat container: fullscreen on mobile, boxed and larger on medium+ screens -->
-    <!-- Changed h-screen to h-full to ensure it strictly takes 100% of parent (body) height -->
-    <div class="w-full h-full flex flex-col
+    <!-- h-screen ensures it takes full viewport height on mobile and adjusts with keyboard -->
+    <!-- md:p-6 applies desktop padding to the main box -->
+    <div class="w-full h-screen flex flex-col
                 md:bg-white md:p-6 md:rounded-lg md:shadow-xl md:max-w-2xl md:h-[70vh]">
 
         <!-- Header - uses flex-shrink-0 to take only its content height -->
-        <div class="bg-white p-4 flex-shrink-0">
-            <h1 class="text-2xl font-bold text-center text-gray-800 mb-0 md:mb-6">Minimal Chat</h1>
+        <!-- px-4 for mobile horizontal padding, md:px-0 to remove it on desktop (main container p-6 takes over) -->
+        <div class="bg-white flex-shrink-0 px-4 md:px-0">
+            <h1 class="text-2xl font-bold text-center text-gray-800 py-4 mb-0 md:mb-6">Minimal Chat</h1>
         </div>
 
 
         <!-- Messages area: grows to fill available space -->
-        <div id="messages" class="border border-gray-300 rounded-none md:rounded-lg p-4 overflow-y-auto bg-gray-50 flex-grow mb-0">
+        <!-- p-4 for consistent inner padding, rounded-none for mobile, rounded-lg for desktop -->
+        <div id="messages" class="border border-gray-300 rounded-none md:rounded-lg p-4 overflow-y-auto bg-gray-50 flex-grow">
         </div>
 
         <!-- Input/Send Button Footer - uses flex-shrink-0 to take only its content height -->
-        <div class="bg-white p-4 flex-shrink-0 pb-[env(safe-area-inset-bottom)]">
+        <!-- px-4 for mobile horizontal padding, pt-4 for mobile top padding -->
+        <!-- pb-[env(safe-area-inset-bottom)] for iOS safe area -->
+        <!-- md:px-0 to remove mobile horizontal padding on desktop (main container p-6 takes over) -->
+        <div class="bg-white flex-shrink-0 px-4 pt-4 pb-[env(safe-area-inset-bottom)] md:px-0">
             <div class="flex space-x-3">
                 <input
                     type="text"
