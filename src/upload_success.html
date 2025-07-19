@@ -1,22 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>file-sharing</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <title>Upload Successful!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
+<body class="bg-indigo-50 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-6">
+            <span role="img" aria-label="sparkles">✨</span> Upload Done!
+        </h1>
 
-<body>
-    <div class="container my-5">
-        <h1>✨ upload done!</h1>
-        <a href="/">home</a>
-        <br>
-        <a href="/contents">view all contents</a>
+        <div class="space-y-4 flex flex-col items-center">
+            <a
+                href="/"
+                class="w-full inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+            >
+                <span role="img" aria-label="home" class="mr-2 text-xl">🏠</span>
+                Go to Home
+            </a>
+
+            <a
+                href="/contents"
+                class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+                <span role="img" aria-label="documents" class="mr-2 text-xl">📄</span>
+                View All Contents
+            </a>
+        </div>
     </div>
 </body>
-
 </html>
