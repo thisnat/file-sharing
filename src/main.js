@@ -6,6 +6,7 @@ const express = require('express')
 const serveIndex = require('serve-index')
 const multer = require('multer')
 const getIpv4 = require('./utils/ipv4')
+const bytesToMB = require('./utils/converter')
 const { v4: uuidv4 } = require('uuid')
 
 const app = express()
@@ -50,7 +51,11 @@ app.get('/chat', (req, res) => {
 })
 
 app.post('/upload', upload.single('file'), (req, res) => {
-  console.log(req.file)
+  console.log(
+    `[${new Date().toISOString()}] File uploaded: ${
+      req.file.originalname
+    } (${bytesToMB(req.file.size)} MB)`
+  )
   res.sendFile(path.join(__dirname, '/upload_success.html'))
 })
 
@@ -60,15 +65,15 @@ const wss = new WebSocket.Server({ server })
 
 wss.on('connection', (ws) => {
   ws.clientId = uuidv4()
-  console.log(`Client connected with ID: ${ws.clientId}`)
+  const connectTime = new Date().toISOString()
+  console.log(`[${connectTime}] Client connected: ${ws.clientId}`)
 
-  // Send the client its own ID upon connection
   ws.send(JSON.stringify({ type: 'init', clientId: ws.clientId }))
 
-  // Broadcast a "user joined" message to all clients
   const joinMessage = {
     type: 'join',
-    clientId: ws.clientId, // The ID of the client that just joined
+    clientId: ws.clientId,
+    timestamp: new Date().toISOString(),
   }
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -78,16 +83,18 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     const messageString = message.toString()
-    console.log(`Received from ${ws.clientId}: ${messageString}`)
+    const messageTimestamp = new Date().toISOString()
+    console.log(
+      `[${messageTimestamp}] Message from ${ws.clientId}: "${messageString}"`
+    )
 
-    // Construct a message object with sender ID
     const messageData = {
       type: 'chat',
       senderId: ws.clientId,
       text: messageString,
+      timestamp: messageTimestamp,
     }
 
-    // Broadcast the stringified message object to all connected clients
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(messageData))
@@ -96,15 +103,20 @@ wss.on('connection', (ws) => {
   })
 
   ws.on('close', () => {
-    console.log(`Client ${ws.clientId} disconnected`)
+    const disconnectTime = new Date().toISOString()
+    console.log(`[${disconnectTime}] Client disconnected: ${ws.clientId}`)
   })
 
   ws.on('error', (error) => {
-    console.error(`WebSocket error for client ${ws.clientId}:`, error)
+    const errorTime = new Date().toISOString()
+    console.error(
+      `[${errorTime}] WebSocket error for client ${ws.clientId}:`,
+      error.message
+    )
   })
 })
 
 server.listen(PORT, () => {
-  console.log(`💐 Http server running on http://${getIpv4()}:${PORT}/`)
+  console.log(`💐 HTTP server running on http://${getIpv4()}:${PORT}/`)
   console.log(`💬 WebSocket server running on ws://${getIpv4()}:${PORT}`)
 })
