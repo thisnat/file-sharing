@@ -12,26 +12,38 @@
     </style>
     <!-- WS_URL_INJECTION_POINT -->
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Minimal Chat</h1>
+<!-- Body takes full screen height and removes default padding for mobile, adds for larger screens -->
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-0 sm:p-4">
+    <!-- Main chat container: fullscreen on mobile, boxed and larger on medium+ screens -->
+    <div class="w-full h-screen flex flex-col
+                md:bg-white md:p-6 md:rounded-lg md:shadow-xl md:max-w-2xl md:h-[70vh]">
 
-        <div id="messages" class="border border-gray-300 rounded-lg p-4 h-64 overflow-y-auto mb-4 bg-gray-50">
+        <!-- Sticky Header -->
+        <div class="sticky top-0 bg-white p-4 z-10 md:static md:p-0 md:bg-transparent">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-0 md:mb-6">Minimal Chat</h1>
         </div>
 
-        <div class="flex space-x-3">
-            <input
-                type="text"
-                id="messageInput"
-                placeholder="Type your message..."
-                class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-                id="sendButton"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-            >
-                Send
-            </button>
+
+        <!-- Messages area: grows to fill available space, adjusted for padding on mobile -->
+        <div id="messages" class="border border-gray-300 rounded-none md:rounded-lg p-4 overflow-y-auto bg-gray-50 flex-grow mb-0 md:mb-4">
+        </div>
+
+        <!-- Sticky Input/Send Button Footer -->
+        <div class="sticky bottom-0 bg-white p-4 z-10 md:static md:p-0 md:bg-transparent">
+            <div class="flex space-x-3">
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Type your message..."
+                    class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                    id="sendButton"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                    Send
+                </button>
+            </div>
         </div>
     </div>
 
@@ -43,33 +55,42 @@
         const wsUrl = window.CHAT_WS_URL || 'ws://localhost:3000';
         const socket = new WebSocket(wsUrl);
 
+        let myClientId = null;
+
         socket.onopen = (event) => {
             console.log('Connected to WebSocket server');
-            appendMessage('System', 'Connected to chat!', 'text-green-600');
+            appendMessage('System', 'Connected to chat!', 'system', 'text-green-600');
         };
 
         socket.onmessage = (event) => {
-            // All messages, including your own, will now be displayed via this handler
-            // This ensures consistency and prevents double messages.
-            appendMessage('Other', event.data); // You might want to differentiate 'You' vs 'Other' here later
+            const messageData = JSON.parse(event.data);
+
+            if (messageData.type === 'init') {
+                myClientId = messageData.clientId;
+                console.log(`My client ID is: ${myClientId}`);
+            } else if (messageData.type === 'chat') {
+                if (messageData.senderId === myClientId) {
+                    appendMessage('You', messageData.text, messageData.senderId, 'text-blue-600');
+                } else {
+                    appendMessage(messageData.senderId, messageData.text, messageData.senderId);
+                }
+            }
         };
 
         socket.onclose = (event) => {
             console.log('Disconnected from WebSocket server', event);
-            appendMessage('System', 'Disconnected from chat.', 'text-red-600');
+            appendMessage('System', 'Disconnected from chat.', 'system', 'text-red-600');
         };
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-            appendMessage('System', 'WebSocket error occurred.', 'text-red-600');
+            appendMessage('System', 'WebSocket error occurred.', 'system', 'text-red-600');
         };
 
         const sendMessage = () => {
             const message = messageInput.value.trim();
             if (message) {
                 socket.send(message);
-                // Removed the local appendMessage('You', message, ...);
-                // The message will now appear when the server echoes it back
                 messageInput.value = '';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
@@ -83,11 +104,35 @@
             }
         });
 
-        function appendMessage(sender, message, colorClass = 'text-gray-800') {
-            const messageElement = document.createElement('p');
-            messageElement.classList.add('mb-2', 'break-words');
-            messageElement.innerHTML = `<span class="font-semibold ${colorClass}">${sender}:</span> ${message}`;
-            messagesDiv.appendChild(messageElement);
+        function appendMessage(senderName, messageText, senderId, colorClass = 'text-gray-800') {
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('mb-2');
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('break-words', 'flex-grow');
+
+            let displayedSenderName = senderName;
+            let titleAttribute = '';
+
+            if (senderId !== 'system') {
+                messageContainer.classList.add('flex', 'items-center', 'space-x-2');
+
+                const avatarImg = document.createElement('img');
+                avatarImg.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${senderId}`;
+                avatarImg.alt = 'Avatar';
+                avatarImg.classList.add('w-8', 'h-8', 'rounded-full', 'flex-shrink-0');
+                messageContainer.appendChild(avatarImg);
+
+                if (senderName !== 'You') {
+                    displayedSenderName = senderId.substring(0, 8);
+                    titleAttribute = `title="${senderId}"`;
+                }
+            }
+
+            contentDiv.innerHTML = `<span class="font-semibold ${colorClass}" ${titleAttribute}>${displayedSenderName}:</span> ${messageText}`;
+
+            messageContainer.appendChild(contentDiv);
+            messagesDiv.appendChild(messageContainer);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
     </script>
