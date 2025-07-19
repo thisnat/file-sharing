@@ -94,6 +94,6 @@ wss.on('connection', (ws) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`💐 Server is running at http://${getIpv4()}:${PORT}/`)
-  console.log(`WebSocket server running on ws://${getIpv4()}:${PORT}`)
+  console.log(`💐 Http server running on http://${getIpv4()}:${PORT}/`)
+  console.log(`💬 WebSocket server running on ws://${getIpv4()}:${PORT}`)
 })
