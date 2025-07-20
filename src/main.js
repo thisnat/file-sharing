@@ -117,6 +117,10 @@ wss.on('connection', (ws) => {
 })
 
 server.listen(PORT, () => {
+  console.log(`
+   /\\    LANGLYPH
+  /__\\   [local-net invocation]
+  `)
   console.log('\n')
   console.log('The room is wired for ritual.')
   console.log('\n')
