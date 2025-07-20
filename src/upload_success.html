@@ -6,30 +6,50 @@
     <title>Upload Successful!</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <style>
-        /* Apply Inter font globally */
+    <!-- Google Fonts: Hedvig Letters Serif (serif) and Inter (sans-serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Hedvig+Letters+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Hedvig Letters Serif for headings and Inter for body text */
         body {
             font-family: 'Inter', sans-serif;
         }
-    </style> -->
+        h1, h2, .font-serif-heading {
+            font-family: 'Hedvig Letters Serif', serif;
+        }
+        /* Custom scrollbar for a cleaner feel, matching the muted palette */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0; /* Light track */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc; /* Muted thumb */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa; /* Darker thumb on hover */
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md text-center">
-        <h1 class="text-4xl font-bold text-gray-800 mb-6">
-            <span role="img" aria-label="sparkles">✨</span> Upload done!
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 text-gray-800">
+    <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm w-full max-w-md text-center">
+        <h1 class="text-3xl font-normal text-gray-900 mb-6 text-center font-serif-heading">
+            Upload Successful!
         </h1>
 
-        <div class="space-y-4 flex flex-col items-center">
+        <div class="space-y-3 flex flex-col items-center">
             <a
                 href="/"
-                class="w-full inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                class="w-full inline-flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 text-sm font-normal py-2 px-4 rounded-md border border-gray-300 shadow-sm transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 font-serif-heading"
             >
                 Home
             </a>
 
             <a
                 href="/contents"
-                class="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="w-full inline-flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 text-sm font-normal py-2 px-4 rounded-md border border-gray-300 shadow-sm transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 font-serif-heading"
             >
                 Archive
             </a>
