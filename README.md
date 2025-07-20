@@ -8,7 +8,7 @@ Just proximity-based transmission—files as glyphs, messages as pulses.
 You appear. You share. You vanish.   
 The mesh remembers.  
 
-## Manifest
+## Manifesto
 
 LANGLYPH does not sync—it **summons**.
 
