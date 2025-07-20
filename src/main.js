@@ -117,6 +117,10 @@ wss.on('connection', (ws) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`💐 HTTP server running on http://${getIpv4()}:${PORT}/`)
-  console.log(`💬 WebSocket server running on ws://${getIpv4()}:${PORT}`)
+  console.log('\n')
+  console.log('The room is wired for ritual.')
+  console.log('\n')
+  console.log(`💐 HTTP server running on  http://${getIpv4()}:${PORT}/`)
+  console.log(`💬 Chat running on         http://${getIpv4()}:${PORT}/chat`)
+  console.log('\n')
 })
