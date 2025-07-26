@@ -23,6 +23,9 @@ let storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: 4000 * 1024 * 1024,
+  },
 })
 
 app.use('/contents', express.static('contents'))
@@ -30,6 +33,10 @@ app.use('/contents', serveIndex('contents', { icons: true }))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/index.html'))
+})
+
+app.get('/success', (req, res) => {
+  res.sendFile(path.join(__dirname, '/upload_success.html'))
 })
 
 app.get('/chat', (req, res) => {
@@ -50,13 +57,36 @@ app.get('/chat', (req, res) => {
   })
 })
 
-app.post('/upload', upload.single('file'), (req, res) => {
-  console.log(
-    `[${new Date().toISOString()}] File uploaded: ${
-      req.file.originalname
-    } (${bytesToMB(req.file.size)} MB)`
-  )
-  res.sendFile(path.join(__dirname, '/upload_success.html'))
+app.post('/upload', (req, res, next) => {
+  upload.single('file')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        console.error(
+          `[${new Date().toISOString()}] Upload error: File too large. Max size: ${bytesToMB(
+            upload.limits.fileSize
+          )} MB.`
+        )
+        return res
+          .status(413)
+          .send(
+            `File too large. Maximum size is ${bytesToMB(
+              upload.limits.fileSize
+            )} MB.`
+          )
+      }
+      console.error(`[${new Date().toISOString()}] Multer error:`, err)
+      return res.status(500).send('File upload failed: ' + err.message)
+    } else if (err) {
+      console.error(`[${new Date().toISOString()}] Unknown upload error:`, err)
+      return res.status(500).send('File upload failed: ' + err.message)
+    }
+    console.log(
+      `[${new Date().toISOString()}] File uploaded: ${
+        req.file.originalname
+      } (${bytesToMB(req.file.size)} MB)`
+    )
+    res.status(200).send('File upload successfully')
+  })
 })
 
 const server = http.createServer(app)

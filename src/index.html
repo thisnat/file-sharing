@@ -39,7 +39,8 @@
             LANGLYPH
         </h1>
         <p class="text-center mt-2 mb-8">[local-net invocation]</p>
-        <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-6">
+
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="space-y-6">
             <div class="relative border border-gray-300 bg-gray-50 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-gray-500 transition duration-200 ease-in-out">
                 <input
                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -53,12 +54,20 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <span id="fileName" class="text-base font-normal">Drag & Drop your file here or Click to Browse</span>
+                    <span class="text-xs text-gray-500 mt-1">(Max 4GB Limit)</span>
                 </label>
             </div>
 
+            <!-- Progress Bar Section -->
+            <div id="progressBarContainer" class="hidden w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div id="progressBar" class="bg-gray-700 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <div id="progressText" class="hidden text-center text-sm text-gray-600">0%</div>
+
             <button
                 type="submit"
-                class="w-full bg-white hover:bg-gray-100 text-gray-800 py-2 px-4 rounded-md border border-gray-300 shadow-sm transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                id="uploadButton"
+                class="w-full inline-flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 py-2 px-4 rounded-md border border-gray-300 shadow-sm transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
             >
                 Upload
             </button>
@@ -86,13 +95,79 @@
     <script>
         const fileInput = document.getElementById('fileInput');
         const fileNameSpan = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadButton = document.getElementById('uploadButton');
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
 
         fileInput.addEventListener('change', (event) => {
             if (event.target.files.length > 0) {
                 fileNameSpan.textContent = event.target.files[0].name;
+                // Reset progress bar if a new file is selected
+                progressBarContainer.classList.add('hidden');
+                progressText.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+                uploadButton.disabled = false; // Re-enable button
             } else {
                 fileNameSpan.textContent = 'Drag & Drop your file here or Click to Browse';
             }
+        });
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file to upload.'); // Use a custom modal in production
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+
+            // Show progress bar and text
+            progressBarContainer.classList.remove('hidden');
+            progressText.classList.remove('hidden');
+            uploadButton.disabled = true; // Disable button during upload
+
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    progressBar.style.width = percentComplete.toFixed(0) + '%';
+                    progressText.textContent = percentComplete.toFixed(0) + '%';
+                }
+            };
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Redirect to success page on successful upload
+                    window.location.href = '/success';
+                } else {
+                    // Handle server errors or file size limits
+                    alert('Upload failed: ' + xhr.responseText); // Use a custom modal in production
+                    progressBarContainer.classList.add('hidden');
+                    progressText.classList.add('hidden');
+                    uploadButton.disabled = false; // Re-enable button
+                    progressBar.style.width = '0%'; // Reset progress
+                    progressText.textContent = '0%';
+                }
+            };
+
+            xhr.onerror = function() {
+                alert('An error occurred during the upload.'); // Use a custom modal in production
+                progressBarContainer.classList.add('hidden');
+                progressText.classList.add('hidden');
+                uploadButton.disabled = false; // Re-enable button
+                progressBar.style.width = '0%'; // Reset progress
+                progressText.textContent = '0%';
+            };
+
+            xhr.open('POST', '/upload', true);
+            xhr.send(formData);
         });
     </script>
 </body>
